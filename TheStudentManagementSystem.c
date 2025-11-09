@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+
 
 typedef struct
 {
@@ -42,6 +44,36 @@ void LoadfromFILE()
     printf("Students Database loaded\n");
 }
 
+
+int ExistingNameChecker(char Name2check[20])
+{
+    LoadfromFILE();
+    for (int i = 0; i < StudentCount; i++)
+    {
+        if (strcmp(students[i].Name, Name2check) == 0)
+        {
+            return 0; // Found → name already exists
+        }
+    }
+    return 1; // Not found → name is unique
+}
+
+
+int ExistingRollNumberChecker(int RNum2check)
+{
+    LoadfromFILE();
+    for (int i = 0; i < StudentCount; i++)
+    {
+        if (students[i].RollNumber == RNum2check)
+        {
+            return 0; // Found → roll number already exists
+        }
+    }
+    return 1; // Not found → roll number is unique
+}
+
+
+
 void write2File(){
     FILE *pFile = fopen("Students_Database.txt", "w");
     if (pFile == NULL)
@@ -63,31 +95,69 @@ void write2File(){
     printf("\n✅ Student record updated successfully and saved to database!\n");
 }
 
+
+
+
 void addStudent()
 {
+    char Name2check[20];
+    int RNum2check;
 
     LoadfromFILE();
-    printf("Enter Name: ");
-            getchar(); // clear newline
-            fgets(students[StudentCount].Name, 20, stdin);
-            students[StudentCount].Name[strcspn(students[StudentCount].Name, "\n")] = '\0';
 
-            printf("Enter Roll Number: \n");
-            scanf("%d", &students[StudentCount].RollNumber);
+    // -------- Name Input Loop --------
+    while (1)
+    {
+        printf("Enter Name: ");
+        getchar(); // consume leftover newline
+        fgets(Name2check, 20, stdin);
+        Name2check[strcspn(Name2check, "\n")] = '\0'; // remove newline
 
-            printf("Enter Class: \n");
-            scanf("%d", &students[StudentCount].Class);
+        if (ExistingNameChecker(Name2check) == 0)
+        {
+            printf("⚠️ Student name already exists! Please enter a different name.\n");
+        }
+        else
+        {
+            strcpy(students[StudentCount].Name, Name2check);
+            break; // exit loop only if name is unique
+        }
+    }
 
-            printf("Enter Marks: \n");
-            scanf("%f", &students[StudentCount].Marks);
+    // -------- Roll Number Input Loop --------
+    while (1)
+    {
+        printf("Enter Roll Number: ");
+        scanf("%d", &RNum2check);
 
-            StudentCount++;
-            write2File();
+        if (ExistingRollNumberChecker(RNum2check) == 0)
+        {
+            printf("⚠️ Roll Number already exists! Please enter a different number.\n");
+        }
+        else
+        {
+            students[StudentCount].RollNumber = RNum2check;
+            break; // exit loop only if roll number is unique
+        }
+    }
 
+    // -------- Class and Marks --------
+    printf("Enter Class: ");
+    scanf("%d", &students[StudentCount].Class);
 
-            printf("Student added successfully and saved to database!\n");
-        
+    printf("Enter Marks: ");
+    scanf("%f", &students[StudentCount].Marks);
+
+    // -------- Save Data --------
+    StudentCount++;
+    write2File();
+
+    printf("🎉 Student added successfully and saved to database!\n");
 }
+
+
+
+
 
 void displayStudents()
 {
